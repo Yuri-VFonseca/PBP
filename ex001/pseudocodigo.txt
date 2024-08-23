@@ -1,0 +1,9 @@
+1- Início
+2- Imprima (qual o número?)
+3- Armazene a resposta #entrada
+4- Respostas = n #entrada
+5- Operação1: digito1 = n-1 #processamento 
+6- operação2: digito2 = 10-n #processamento
+7- operação3: 9n = digito1 * 10 + digito2 #processamento
+8- Apresente o resultado de operação3 (9n) #saida
+9- Fim
