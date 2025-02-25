@@ -1,39 +1,22 @@
-'''A extensão ".csv" significa "comma-separated values" ou "valores separados por vírgula". É a extensão utilizada por sistemas de gerência de tabelas como o Microsoft Excel ou Google Sheets. Nesse exercício vamos criar uma planilha com dados sobre livros que você já leu ou gostaria de ler. Siga as instruções.
+import csv
 
-Selecione pelo menos 10 livros que você leu ou gostaria de ler. Você deve reunir as seguintes informações: título, autor, ano de publicação e número de páginas.
+livros = [
+    ["A Revolução dos Bichos", "George Orwell", "1945", "152"],
+    ["1984", "George Orwell", "1949", "328"],
+    ["As 5 Linguagens do Amor", "Gary Chapman", "1992", "208"],
+    ["A Metamorfose", "Franz Kafka", "1915", "128"],
+    ["O Poder do Hábito", "Charles Duhigg", "2012", "371"],
+    ["A Sutil Arte de Ligar o F*da-se", "Mark Manson", "2016", "224"],
+    ["Batman: O Cavaleiro das Trevas", "Frank Miller", "1986", "372"],
+    ["The Martian", "Andy Weir", "2011", "369"],
+    ["Project Hail Mary", "Andy Weir", "2021", "496"]
+]
 
-No Python, crie um arquivo chamado "meus_livros.csv", aberto para escrita.
+with open("meus_livros.csv", mode="w", newline="", encoding="utf-8") as file:
+    writer = csv.writer(file)
 
-Na primeira linha escreva os títulos da planilha separados por vírgula (sem espaço em branco). Os títulos são: "Título", "Autor", "Ano de publicação" e "Número de páginas". Lembre de finalizar a linha com uma quebra de linha.
+    writer.writerow(["Título", "Autor", "Ano de publicação", "Número de páginas"])
 
-A partir da segunda linha escreva as informações de cada livro que você levantou, separando cada informação por uma vírgula (sem espaço em branco). Lembre de finalizar cada linha com uma quebra de linha.
-
-Feche o arquivo para salvá-lo e abra com a ferramenta de planilhas de sua escolha. Como você já tem conta no Google, sugiro abrir com o Google Sheets.
-
-Seu arquivo deve ser aberto como uma planilha parecida com essa:
-
-Título
-
-Autor
-
-Ano de publicação
-
-Número de páginas
-
-O Caçador de Pipas
-
-Khaled Hosseini
-
-2003
-
-368
-
-Torto Arado
-
-Itamar Vieira Junior
-
-2019
-
-264
-
- '''
+    for livro in livros:
+        writer.writerow(livro)
+print("Arquivo 'meus_livros.csv' criado com sucesso!")

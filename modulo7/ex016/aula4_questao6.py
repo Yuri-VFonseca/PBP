@@ -1,14 +1,4 @@
-'''Vamos descobrir as músicas mais populares do Spotify nos últimos 10 anos! 
-
-Crie uma conta no Kaggle, uma das principais plataformas de ciência de dados e aprendizado de máquina. Em disciplinas avançadas vamos trabalhar com bases de dados provenientes de lá!
-
-Baixe o arquivo spotify-2023.csv no final da página que apresenta os dados.
-
-No Python, abra o arquivo para leitura e imprima as cinco primeiras linhas
-
-Para abrir o arquivo, defina o parâmetro encoding='latin-1'
-
-Após compreender a estrutura do arquivo (divisão em colunas, caracter separador de coluna, etc.) passamos para a etapa de extração de informações.
+'''Após compreender a estrutura do arquivo (divisão em colunas, caracter separador de coluna, etc.) passamos para a etapa de extração de informações.
 
 O arquivo está estruturado da seguinte forma: cada linha representa uma música e contém as seguintes informações separadas por vírgula (CSV):
 
@@ -58,3 +48,33 @@ Ao final imprima a lista produzida. Ex:
  ['I Wanna Be Yours', 'Arctic Monkeys', 2013, 1297026226], 
  ...,
  ['As It Was', 'Harry Styles', 2022, 2513188493]]'''
+import csv
+musicas_por_ano = []
+with open("spotify-2023.csv", "r", encoding="latin-1") as arquivo:
+    leitor = csv.reader(arquivo)
+    next(leitor) 
+    for linha in leitor:
+        if len(linha) < 5:
+            continue
+        nome_musica = linha[0]
+        nome_artista = linha[1]
+        numero_artistas = linha[2]  
+        ano_lancamento = linha[3]
+        streams = linha[4]
+        if not ano_lancamento.isdigit() or not streams.isdigit():
+            continue
+        ano_lancamento = int(ano_lancamento)
+        streams = int(streams)
+        if 2012 <= ano_lancamento <= 2022:
+            encontrado = False
+            for i, musica in enumerate(musicas_por_ano):
+                if musica[2] == ano_lancamento:  
+                    if streams > musica[3]:  
+                        musicas_por_ano[i] = [nome_musica, nome_artista, ano_lancamento, streams]
+                    encontrado = True
+                    break
+            if not encontrado:
+                musicas_por_ano.append([nome_musica, nome_artista, ano_lancamento, streams])
+musicas_por_ano.sort(key=lambda x: x[2])
+for musica in musicas_por_ano:
+    print(musica)
