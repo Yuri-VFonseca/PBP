@@ -1,5 +1,3 @@
-import csv
-
 livros = [
     ["A Revolução dos Bichos", "George Orwell", "1945", "152"],
     ["1984", "George Orwell", "1949", "328"],
@@ -12,11 +10,7 @@ livros = [
     ["Project Hail Mary", "Andy Weir", "2021", "496"]
 ]
 
-with open("meus_livros.csv", mode="w", newline="", encoding="utf-8") as file:
-    writer = csv.writer(file)
-
-    writer.writerow(["Título", "Autor", "Ano de publicação", "Número de páginas"])
-
-    for livro in livros:
-        writer.writerow(livro)
-print("Arquivo 'meus_livros.csv' criado com sucesso!")
+with open("meus_livros.csv", "w", encoding="utf-8") as file:
+    file.write("Título, Autor, Ano de publicação, Número de páginas\n")
+    for livro in livros[1:]:
+        livros_write(",".join(map(str, livro)) + "\n")
