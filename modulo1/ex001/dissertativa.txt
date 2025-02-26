@@ -1,0 +1,15 @@
+[Portal.BuildPatch]
+ChunkDownloads=5
+ChunkRetries=20
+RetryTime=0.5
+
+1- Leia e armazene o número que se deseja multiplicar; #entrada
+2- Se o número for maior que 10, retorne erro; #operação
+3- Se o número for menor que 0, retorne erro; #operação
+4- Se o número não for inteiro, retorne erro; #operação
+5- Se o número for igual a zero, armazene 0; #operação
+6- entrada = n; #operação
+7- Operação digito1 = n-1; #operação
+8- Operação digito2 = 10-n; #operação
+9- Senão, aplique a operação 9n = digito1 * 10 + digito2 e apresente o resultado; #operação
+10- Apresente o resultado da soma e finalize o programa; #saída
