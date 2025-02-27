@@ -106,16 +106,89 @@ def buscar_usuario(chave, senha):
             nome, senha_armazenada, tipo, n_login = linha
             if chave == nome or str(n_login) == str(chave):
                 if senha ==  senha_armazenada: 
-                return {"Nome": nome, "Tipo": tipo, "Número de login": n_login} # chave - produto
+                    return {"Nome": nome, "Tipo": tipo, "Número de login": n_login} # chave - produto
             else: 
                 print("Senha incorreta")
                 return None
         print("Usuário não encontrado")
         return None
 #update
-
+def update_usuario(chave, senha, novo_nome=None, nova_senha=None, novo_tipo=None, usuario_logado=None): 
+    usuario = buscar_usuario(chave)
+    if usuario is None: 
+        print("Usuário não encontrado")
+        return 
+    if usuario["Senha"] != senha: 
+        print("Senha incorreta")
+        return
+    if usuario_logado["Tipo"] == "cliente":
+        if usuario_logado["Nome"] != usuario["Nome"]:
+            print("Você não tem permissão para alterar o perfil de outro usuário")
+            return
+        if novo_tipo: 
+            print("Você não pode alterar o seu tipo de usuário")
+        return
+    elif usuario_logado["Tipo"] == "funcionario": 
+        if usuario_logado["Nome"] != usuario["Nome"] and usuario["Tipo"] in ["funcionario", "gerente"]:
+            print("Você não tem permissão para alterar o perfil de outro funcionário ou gerente")
+        return
+    elif usuario_logado["Tipo"] == "gerente": 
+        pass
+    usuarios_atualizados = []
+    with open('usuarios.csv', 'r', newline='', encoding="UTF-8") as file: 
+        reader = csv.reader(file)
+        next(reader, None)
+        for linha in reader: 
+            if len(linha) < 4: 
+                continue
+            nome, senha_atual, tipo, n_login = linha
+            if nome == usuario["Nome"] or str(n_login) == str(usuario["Número de login"]): 
+                if novo_nome: 
+                    nome = novo_nome
+                if nova_senha: 
+                    senha_atual = nova_senha
+                if novo_tipo and usuario_logado["Tipo"] == "gerente": 
+                    tipo = novo_tipo
+            usuarios_atualizados.append([nome, senha_atual, tipo, n_login])
+    with open('usuarios.csv', 'w', newline='', encoding="UTF-8") as file: 
+        writer = csv.writer(file)
+        writer.writerow(['Nome', 'Senha', 'Tipo', 'Número de login'])
+        writer.writerows(usuarios_atualizados)
 #delete
-
+def delete_usuario(chave, senha, usuario_logado): 
+    usuario = buscar_usuario(chave, senha)
+    if usuario is None: 
+        print("Usuário não encontrado")
+        return 
+    if usuario["Senha"] != senha: 
+        print("Senha incorreta")
+        return
+    if usuario_logado["Tipo"] == "cliente":
+        if usuario_logado["Nome"] != usuario["Nome"]:
+            print("Você não tem permissão para deletar o perfil de outro usuário")
+            return
+    elif usuario_logado["Tipo"] == "funcionario": 
+        if usuario_logado["Nome"] != usuario["Nome"] and usuario["Tipo"] in ["funcionario", "gerente"]:
+            print("Você não tem permissão para deletar o perfil de outro funcionário ou gerente")
+            return
+    elif usuario_logado["Tipo"] == "gerente": 
+        pass
+    usuarios_atualizados = []
+    with open('usuarios.csv', 'r', newline='', encoding="UTF-8") as file: 
+        reader = csv.reader(file)
+        next(reader, None)
+        for linha in reader: 
+            if len(linha) < 4: 
+                continue
+            nome, senha_armazenada, tipo, n_login = linha
+            if nome == usuario["Nome"] or str(n_login) == str(usuario["Número de login"]):
+                continue
+            usuarios_atualizados.append(linha)
+    with open('usuarios.csv', 'w', newline='', encoding='UTF-8') as file: 
+        writer = csv.writer(file)
+        writer.writerow(["Nome", "Senha", "Quantidade", "Número de login"])
+        writer.writerows(usuarios_atualizados)
+    print(f"Usuário {usuario["Nome"]} excluído com sucesso!")
 #cliente (ver produto, alterar suas info)
 
 #funcionario (ver, dar baixa e aumentar, atualizar clientes e criar)
@@ -123,6 +196,54 @@ def buscar_usuario(chave, senha):
 #gerente (todo o restante + cadastrar novos produtos e alterar preços, CRUD clientes)
 
 #menus 
+def menu_usuario(): 
+    while True: 
+        print("----- Menu de Usuário -----")
+        print("1 - Entrar cliente")
+        print("2 - Entrar funcionário")
+        print("3 - Entrar gerente")
+        print("4 - Criar usuário")
+        print("5 - Criar funcionário")
+        print("6 - Criar gerente")
+        print("0 - Sair")
+        opcao = int(input("Opção: "))
+        if opcao == 0: 
+            print("ENCERRADO")
+            break
+        elif opcao == 1:
+            nome = input("Digite o nome: ")
+            senha = input("Digite a senha: ")
+            usuario = buscar_usuario(nome, senha)
+            if usuario: 
+                print(f"Bem-vindo, {usuario["Nome"]}!")
+            else: 
+                print("Usuário não encontrado ou senha incorreta")
+        elif opcao == 2: 
+            nome = input("Digite o nome: ")
+            senha = input("Digite para funcionários: ")
+            usuario = buscar_usuario(nome, senha)
+            if usuario and usuario["Tipo"] == 'funcionario': 
+                print(f"Bem-vindo, {usuario["Nome"]} (funcionário)!")
+            else: 
+                print("Usuário não encontrado, senha incorreta ou não é um funcionário")
+        elif opcao == 3: 
+            nome = input("Digite o nome: ")
+            senha = input("Digite a senha: ")
+            usuario = buscar_usuario(nome, senha)
+            if usuario and usuario["Tipo"] == 'gerente': 
+                print(f"Bem-vindo, {usuario["Nome"]} (gerente)!")
+            else: 
+                print("Usuário não encontrado, senha incorreta ou não é gerente")
+        elif opcao == 4: 
+
+        elif opcao == 5: 
+
+        elif opcao == 6: 
+
+        
+        else: 
+            print("Escolha uma opção válida")
+
 
 # Variaveis, listas e cabeçalho
 with open("produtos.csv", 'w', newline="", encoding="UTF-8") as file: 
