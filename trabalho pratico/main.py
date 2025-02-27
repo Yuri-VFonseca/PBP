@@ -205,6 +205,8 @@ def menu_usuario():
         print("4 - Criar usuário")
         print("5 - Criar funcionário")
         print("6 - Criar gerente")
+        print("7 - Editar perfil")
+        print("8 - Deleter perfil")
         print("0 - Sair")
         opcao = int(input("Opção: "))
         if opcao == 0: 
@@ -235,21 +237,56 @@ def menu_usuario():
             else: 
                 print("Usuário não encontrado, senha incorreta ou não é gerente")
         elif opcao == 4: 
-
+            nome = input("Digite o nome: ")
+            senha = input("Digite a senha: ")
+            create_usuario(nome, senha)
+            print(f"Usuário {nome} criado com sucesso!")
         elif opcao == 5: 
-
+            senha_mestre = input("Digite a senha mestre para criar um funcionário: ")
+            if senha_mestre == senha_funcionario: 
+                nome = input("Digite o nome: ")
+                create_usuario(nome, senha_funcionario)
+                print(f"Funcionário {nome} criado com sucesso!")
+            else: 
+                print("Senha mestre incorreta")
         elif opcao == 6: 
+            senha_mestre = input("Digite a senha mestre para criar um funcionário: ")
+            if senha_mestre == senha_gerente: 
+                nome = input("Digite o nome: ")
+                create_usuario(nome, senha_gerente)
+                print(f"Gerente {nome} criado com sucesso!")
+            else: 
+                print("Senha mestre incorreta")
+        elif opcao == 7: 
+            nome = input("Digite seu nome: ")
+            senha = input("Digite sua senha: ")
+            usuario_logado = buscar_usuario(nome, senha)
+            if usuario_logado: 
+                print(f"Bem-vindo, {usuario_logado['Nome']}!")
+                novo_nome = input("Digite o novo nome (ou pressione Enter para manter): ")
+                nova_senha = input("Digite a nova senha (ou pressione Enter para manter): ")
+                novo_tipo = input("Digite o novo tipo (ou pressione Enter para manter): ").lower()
+                update_usuario(nome, senha, novo_nome, nova_senha, novo_tipo, usuario_logado)
+                print("Perfil atualizado com sucesso!")
+            else: 
+                ("Usuário não encotrado ou senha incorreta")
 
-        
+        elif opcao == 8: 
+            nome = input("Digite seu nome: ")
+            senha = input("Digite sua senha: ")
+            usuario_logado = buscar_usuario(nome, senha)
+            if usuario_logado: 
+                delete_usuario(nome, senha, usuario_logado)
+                print(f"Usuário {nome} deletado com sucesso!")
+            else:
+                print("Usuário não encontrado ou sneha incorreta")
         else: 
             print("Escolha uma opção válida")
-
-
 # Variaveis, listas e cabeçalho
-with open("produtos.csv", 'w', newline="", encoding="UTF-8") as file: 
+"""with open("produtos.csv", 'w', newline="", encoding="UTF-8") as file: 
     writer = csv.writer(file)
     writer.writerow(["Nome", "Preço", "Quantidade", "Código"])
-
+"""
 
 # Menu
 
