@@ -213,7 +213,11 @@ def menu_usuario():
         print("7 - Editar perfil")
         print("8 - Deleter perfil")
         print("0 - Sair")
-        opcao = int(input("Opção: "))
+        try: 
+            opcao = int(input("Opção: "))
+        except ValueError: 
+            print("Escolha uma opção válida")
+            continue
         if opcao == 0: 
             print("ENCERRADO")
             break
@@ -296,7 +300,11 @@ def menu_produtos(usuario_logado):
             print("3 - Editar produto")
             print("4 - Deletar produto")
         print("0 - Sair")
-        opcao = int(input("Opção: "))
+        try: 
+            opcao = int(input("Opção: "))
+        except ValueError: 
+            print("Escolha uma opção válida")
+            continue
         if opcao == 0: 
             print("Encerrando o menu de produtos...")
             break
@@ -350,6 +358,8 @@ def menu_produtos(usuario_logado):
                 print("Produto não encontrado")
         else: 
             print("Escolha uma opção válida")
+menu_usuario()
+menu_produtos()
 # Variaveis, listas e cabeçalho
 """with open("produtos.csv", 'w', newline="", encoding="UTF-8") as file: 
     writer = csv.writer(file)
