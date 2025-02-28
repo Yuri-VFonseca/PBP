@@ -8,8 +8,8 @@ import random
 import csv
 import re
 # senhas mestres
-senha_funcionario = "@charliebrownjr72"
-senha_gerente = "#redhotchilipeppers_1983"
+senha_funcionario = "@CharlieBrownJR72"
+senha_gerente = "#RedHotChiliPeppers_1983"
 #funcoes - produtos
 produtos = []
 #create
