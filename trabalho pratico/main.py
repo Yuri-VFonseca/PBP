@@ -6,6 +6,7 @@ Produtos ou serviços - armazernar em um .csv separado, aplicar crud
 '''
 import random
 import csv
+import re
 # senhas mestres
 senha_funcionario = "@charliebrownjr72"
 senha_gerente = "#redhotchilipeppers_1983"
@@ -15,10 +16,10 @@ produtos = []
 def create_produto(produto): 
     with open('produtos.csv', 'a', newline='', encoding="UTF-8") as file: 
         writer = csv.writer(file)
-        writer.writerow(produtos) # criar colunas na planilha 
+        writer.writerow(produto) # criar colunas na planilha 
 def info_produtos(nome, preco, quantidade):
     codigo = random.randint(10000000, 999999999) # criar codigo aleatorio
-    produtos = [nome, preco, quantidade, codigo]
+    produto = [nome, preco, quantidade, codigo]
     create_produto(produto)
 #read
 def buscar_produto(chave): 
@@ -95,8 +96,12 @@ def create_usuario(nome, senha):
     with open('usuarios.csv', 'a', newline='', encoding="UTF-8") as file: 
         writer = csv.writer(file)
         writer.writerow(usuario)
+def create_senha(chave): 
+    if (len(chave) >= 8 and re.search(r"\d", chave) and re.search(r"[!@#$%¨&*(){}+=§^,.:;<>[]]", chave) and re.search(r"[A-Z]", chave) and re.search(r"[a-z]", chave)):
+        return False
+    return True 
 #read
-def buscar_usuario(chave, senha): 
+def buscar_usuario(chave, senha=None): 
     with open('usuarios.csv', 'r', newline='', encoding="UTF-8") as file: 
         reader = csv.reader(file)
         next(reader, None)
@@ -114,7 +119,7 @@ def buscar_usuario(chave, senha):
         return None
 #update
 def update_usuario(chave, senha, novo_nome=None, nova_senha=None, novo_tipo=None, usuario_logado=None): 
-    usuario = buscar_usuario(chave)
+    usuario = buscar_usuario(chave, senha)
     if usuario is None: 
         print("Usuário não encontrado")
         return 
@@ -280,6 +285,69 @@ def menu_usuario():
                 print(f"Usuário {nome} deletado com sucesso!")
             else:
                 print("Usuário não encontrado ou sneha incorreta")
+        else: 
+            print("Escolha uma opção válida")
+def menu_produtos(usuario_logado): 
+    while True: 
+        print("----- Menu de produtos ------")
+        print("1 - Buscar produto")
+        if usuario_logado["Tipo"] in ['funcionario', 'gerente']: 
+            print("2 - Adicionar novo produto")
+            print("3 - Editar produto")
+            print("4 - Deletar produto")
+        print("0 - Sair")
+        opcao = int(input("Opção: "))
+        if opcao == 0: 
+            print("Encerrando o menu de produtos...")
+            break
+        elif opcao == 1: 
+            nome_produto = input("Digite o nome ou código do produto que deseja buscar: ")
+            produto = buscar_produto(nome_produto)
+            if produto: 
+                print(produto)
+            else: 
+                print("Produto não encontrado")
+        elif opcao == 2 and usuario_logado["Tipo"] == "gerente": 
+            nome_produto = input("Digite o nome ou código do produto que deseja criar: ")
+            preco = float(input("Preço do produto: "))
+            quantidade = int(input("Quantidade inicial: "))
+            info_produtos(nome_produto,preco,quantidade)
+            print("Produto adicionado com sucesso! ")
+        elif opcao == 3 and usuario_logado["Tipo"] in ["funcionario", 'gerente']: 
+            nome_produto = input("Digite o nome ou código do produto que deseja editar: ") 
+            print("1 - Adicionar estoque")
+            print("2 - Reduzir estoque")
+            opcao = int(input("Escolha uma opção: "))
+            quantidade = int(input("Digite a quantidade: "))
+            if opcao == 1: 
+                update_produto(produto["Código"],quantidade=quantidade, usuario_tipo=usuario_logado["Tipo"])
+                print(f"Estoque de {produto['Nome']} atualizado! Quantidade adicionada: {quantidade}")
+            elif opcao == 2: 
+                if produto['Quantidade'] >= quantidade: 
+                    update_produto(produto['Código'], quantidade=quantidade,usuario_tipo=usuario_logado["Tipo"])
+                    print(f"Estoque de {produto["Nome"]} atualizade! Quantidade reduzida: {quantidade}")
+                else: 
+                    print("Não há estoque suficiente para reduzir essa quantidade")
+            elif opcao != 1 and opcao != 2: 
+                print("Escolha uma opção válida")
+            else: 
+                print("Produto não encontrado")
+
+        elif opcao == 4 and usuario_logado["Tipo"] == "gerente": 
+            nome_produto = input("Digite o nome ou código do produto que deseja deletar: ")
+            nome_produto = buscar_produto(nome_produto)
+            if produto:  
+                print("Deseja apagar o produto? ")
+                print("1 - SIM")
+                print("2 - Não")
+                opcao = int(input())
+                if opcao == 1: 
+                    delete_produto(nome_produto["Código"])
+                    print("Produto deletado com sucesso!")
+                if opcao == 2: 
+                    print("Produto não foi deletado")
+            else: 
+                print("Produto não encontrado")
         else: 
             print("Escolha uma opção válida")
 # Variaveis, listas e cabeçalho
