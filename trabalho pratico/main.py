@@ -7,16 +7,31 @@ Produtos ou serviços - armazernar em um .csv separado, aplicar crud
 import random
 import csv
 import re
+import os
 # senhas mestres
 senha_funcionario = "@CharlieBrownJR72"
 senha_gerente = "#RedHotChiliPeppers_1983"
 #funcoes - produtos
 produtos = []
+cabecalho_produtos = ["Nome", "Preço", "Quantidade", "Código"]
+cabecalho_usuarios = ["Nome", "Senha", "Tipo", "Número de login"]
 #create
-def create_produto(produto): 
+def create_produto(produto, cabecalho): 
+    if not os.path.exists("produtos.csv"): 
+        with open("produtos.csv", 'w', newline='', encoding="UTF-8") as file: 
+            writer = csv.writer(file)
+            writer.writerow(cabecalho)
+    try: 
+        with open('produtos.csv', 'r', newline='', encoding="UTF-8") as file: 
+            pass
+    except FileNotFoundError: 
+        with open('produtos.csv', 'w', newline='', encoding='UTF-8') as file: 
+            writer = csv.writer(file)
+            writer.writerow(['Nome', 'Preço', 'Quantidade', 'Código'])
     with open('produtos.csv', 'a', newline='', encoding="UTF-8") as file: 
         writer = csv.writer(file)
-        writer.writerow(produto) # criar colunas na planilha 
+        writer.writerow(produto)
+            # criar colunas na planilha 
 def info_produtos(nome, preco, quantidade):
     codigo = random.randint(10000000, 999999999) # criar codigo aleatorio
     produto = [nome, preco, quantidade, codigo]
@@ -83,23 +98,36 @@ def delete_produto(chave):
         writer.writerows(produtos_atualizados)
     #usuarios
 #create 
-def create_usuario(nome, senha): 
-    tipo = "cliente"
-    n_login = random.randint(100,1000)
-    if senha == senha_funcionario: 
+def senha_valida(chave): 
+    if (len(chave) >= 8 and re.search(r"\d", chave) and re.search(r"[!@#$%¨&*(){}+=§^,.:;<>[]]", chave) and re.search(r"[A-Z]", chave) and re.search(r"[a-z]", chave)):
+        return True
+    return False 
+def create_usuario(nome, senha, opcao): 
+    if opcao == 5: 
+        if senha != senha_funcionario: 
+            print("Senha incorreta")
+            return False
         tipo = "funcionário"
-        n_login = random.randint(11, 99)
-    elif senha == senha_gerente: 
+        n_login = random.randint(10,99)
+    elif opcao == 6: 
+        if senha != senha_gerente:
+            print("Senha incorreta")
+            return False
         tipo = "gerente"
-        n_login = random.randint(1,10)
+        random.randint(1,10)
+    elif opcao == 4: 
+        if senha_valida(senha) == False: 
+            print("Senha inválida para usuário! Deve conter ao menos 8 caracteres, contendo número, maiúscula, minúscula e caracter especial")
+            return False
+        tipo = "cliente"
+        n_login = random.randint(1000, 1999)
+    else: 
+        print("Opção válida")
+        return False
     usuario = [nome, senha, tipo, n_login]
-    with open('usuarios.csv', 'a', newline='', encoding="UTF-8") as file: 
+    with open("usuarios.csv", 'a', newline='', encoding="UTF-8") as file: 
         writer = csv.writer(file)
         writer.writerow(usuario)
-def create_senha(chave): 
-    if (len(chave) >= 8 and re.search(r"\d", chave) and re.search(r"[!@#$%¨&*(){}+=§^,.:;<>[]]", chave) and re.search(r"[A-Z]", chave) and re.search(r"[a-z]", chave)):
-        return False
-    return True 
 #read
 def buscar_usuario(chave, senha=None): 
     with open('usuarios.csv', 'r', newline='', encoding="UTF-8") as file: 
@@ -248,13 +276,16 @@ def menu_usuario():
         elif opcao == 4: 
             nome = input("Digite o nome: ")
             senha = input("Digite a senha: ")
-            create_usuario(nome, senha)
-            print(f"Usuário {nome} criado com sucesso!")
+            create_usuario(nome, senha, opcao)
+            try: 
+                print(f"Usuário {nome} criado com sucesso!")
+            except Exception as e: 
+                print(f"Usuário {nome} não foi criado")
         elif opcao == 5: 
             senha_mestre = input("Digite a senha mestre para criar um funcionário: ")
             if senha_mestre == senha_funcionario: 
                 nome = input("Digite o nome: ")
-                create_usuario(nome, senha_funcionario)
+                create_usuario(nome, senha_funcionario, opcao)
                 print(f"Funcionário {nome} criado com sucesso!")
             else: 
                 print("Senha mestre incorreta")
@@ -262,7 +293,7 @@ def menu_usuario():
             senha_mestre = input("Digite a senha mestre para criar um funcionário: ")
             if senha_mestre == senha_gerente: 
                 nome = input("Digite o nome: ")
-                create_usuario(nome, senha_gerente)
+                create_usuario(nome, senha_gerente, opcao)
                 print(f"Gerente {nome} criado com sucesso!")
             else: 
                 print("Senha mestre incorreta")
@@ -358,6 +389,7 @@ def menu_produtos(usuario_logado):
                 print("Produto não encontrado")
         else: 
             print("Escolha uma opção válida")
+
 menu_usuario()
 menu_produtos()
 # Variaveis, listas e cabeçalho
