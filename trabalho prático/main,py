@@ -1,8 +1,8 @@
 import random, sys, os, re, csv
 
 # Senhas
-senha_funcionario = "chave"
-senha_gerente = "senha"
+senha_funcionario = "@92CharlieBrownJr"
+senha_gerente = "#RedHotChiliPeppers_1983"
 
 # Criar cabeçalho
 
@@ -81,7 +81,8 @@ def create_usuario(nome, senha, opcao):
     if not verifica_nome_usuario(nome): 
         print("Erro: Nome de usuário já existe. Escolha outro")
         return None
-    elif opcao == 2:
+    n_login = None
+    if opcao == 2:
         if not senha_valida(senha):
             return None
         tipo = "usuario"
@@ -133,13 +134,13 @@ def buscar_usuario(chave, senha=None):
     
 # Atualizar usuário
 
-def update_usuario(chave, senha, novo_nome=None, novo_n_login=None, usuario_logado=None):
+def update_usuario(chave, senha, novo_nome=None, novo_n_login=None, usuario_tipo=None):
     usuario = buscar_usuario(chave, senha)
     if usuario is None:
         print("Usuário não encontrado")
         return
     if usuario["Tipo"] == "usuario":
-        if usuario_logado["Nome"] != usuario["Nome"]: # Aconteceu um erro, onde ao editar o mesmo usuário duas vezes é negado o acesso
+        if usuario_tipo["Nome"] != usuario["Nome"]: # Aconteceu um erro, onde ao editar o mesmo usuário duas vezes é negado o acesso
             print("Você não tem permissão para alterar o perfil de outro usuário")
             return
         if novo_nome:
@@ -150,8 +151,8 @@ def update_usuario(chave, senha, novo_nome=None, novo_n_login=None, usuario_loga
             else:
                 print("Número de login já existe. Não é possível alterar ou é maior que 1000.")
                 return
-    elif usuario_logado["Tipo"] == "funcionario":
-        if usuario_logado["Nome"] != usuario["Nome"] and usuario["Tipo"] in ["funcionario", "gerente"]:
+    elif usuario_tipo["Tipo"] == "funcionario":
+        if usuario_tipo["Nome"] != usuario["Nome"] and usuario["Tipo"] in ["funcionario", "gerente"]:
             print("Você não tem permissão para alterar o perfil de outro funcionário ou gerente")
             return
         if novo_nome:
@@ -162,7 +163,7 @@ def update_usuario(chave, senha, novo_nome=None, novo_n_login=None, usuario_loga
             else:
                 print("Número de login já existe, ou é maior que 100. Não é possível alterar.")
                 return
-    elif usuario_logado["Tipo"] == "gerente":
+    elif usuario_tipo["Tipo"] == "gerente":
         if novo_nome:
             usuario["Nome"] = novo_nome
         if novo_n_login:
@@ -254,7 +255,6 @@ def create_produto(nome, preco, quantidade):
 # Buscar produto
 
 def buscar_produto(chave): 
-    produto = None
     with open("produtos.csv", 'r', newline='', encoding="UTF-8") as file: 
         reader = csv.reader(file)
         next(reader,None)
@@ -262,47 +262,58 @@ def buscar_produto(chave):
             if len(linha) != 4: 
                 continue
             nome, preco, quantidade, codigo = linha
-            if chave == str(nome).lower() or chave == int(codigo): 
+            if chave.lower() == nome.lower(): 
                 return {"Nome": nome, "Preço": preco, "Quantidade": quantidade, "Código": codigo}
+            try: 
+                if int(chave) == int(codigo): 
+                    return {"Nome": nome, "Preço": preco, "Quantidade": quantidade, "Código": codigo}
+            except ValueError: 
+                pass
     return None
 
 # Atualizar produto
 
-def atualizar_produto(chave, nome=None, preco=None, quantidade=None, usuario_tipo="usuario"):
-    if usuario_tipo == "usuario": 
+def atualizar_produto(chave, novo_nome=None, preco=None, usuario_logado=None, quantidade=None): 
+    produto = buscar_produto(chave)
+    if produto is None: 
+        print("Produto não encontrado")
+        return
+    elif usuario_logado["Tipo"] == 'usuario': 
         print("Você não tem permissão para alterar produtos")
-        return None
-    elif usuario_tipo == "funcionario": 
-        if nome or preco: 
-            print("Funcionários podem alterar apenas a quantidade")
+        return
+    elif usuario_logado["Tipo"] == 'funcionario': 
+        if quantidade is None: 
+            print("Funcionário só pode alterar a quantidade do produto")
             return
-        else: 
-            pass
-    elif usuario_tipo == "gerente": 
+    elif usuario_logado["Tipo"] == 'gerente': 
         pass
     else: 
         print("ERROR")
-        return None
+        return
+
     produtos_atualizados = []
     with open('produtos.csv', 'r', newline='', encoding="UTF-8") as file: 
         reader = csv.reader(file)
         next(reader, None)
         for linha in reader: 
-            if len(linha) != 4:
+            if len(linha) != 4: 
                 continue
             nome_produto, preco_atual, quantidade_atual, codigo = linha
-            if chave == nome_produto or chave == int(codigo): 
-                if nome: 
-                    nome_produto = nome
+            if str(nome_produto) == chave or int(codigo) == chave: 
+                if novo_nome: 
+                    nome_produto = novo_nome  # Alterar o nome do produto
                 if preco is not None: 
-                    preco_atual = preco
+                    preco_atual = preco  # Alterar o preço
                 if quantidade is not None: 
-                    quantidade_atual = quantidade + int(quantidade_atual)
+                    quantidade_atual = quantidade + int(quantidade_atual)  # Alterar a quantidade
             produtos_atualizados.append([nome_produto, preco_atual, quantidade_atual, codigo])
-    with open('produtos.csv', 'w', newline='', encoding="UTF-8") as file: 
+    
+    # Gravando as atualizações de volta no arquivo
+    with open('produtos.csv', 'w', encoding='UTF-8', newline='') as file: 
         writer = csv.writer(file)
-        writer.writerow(['Nome', 'Preço', 'Quantidade', 'Código'])
-        writer.writerow(produtos_atualizados)
+        writer.writerow(['Nome', 'Preço', 'Quantidade', 'Código'])  # Cabeçalho
+        writer.writerows(produtos_atualizados)  # Dados atualizados
+
 
 # Deletar produto
 
@@ -358,13 +369,18 @@ def menu_usuario():
                 print(f"Usuário {nome} criado com sucesso!")
             else:
                 print("Erro ao criar usuário, verifique a senha ou a opção selecionada")
-        elif opcao == 3 and usuario_logado["Tipo"] in ["funcionario", "gerente"]:
-            nome = input("Digite o nome: ")
-            senha = input("Digite a senha do funcionário: ")
-            if create_usuario(nome, senha, opcao):
-                print(f"Funcionário {nome} criado com sucesso!")
-            else:
-                print("Erro ao criar funcionário, verifique a senha ou a opção selecionada")
+        elif opcao == 3:
+            if usuario_logado is None: 
+                print("Erro: Você precisa estar logado para criar um funcionário")
+            elif usuario_logado["Tipo"] in ['funcionario', 'gerente']: 
+                nome = input("Digite o nome: ")
+                senha = input("Digite a senha do funcionário: ")
+                if create_usuario(nome, senha, opcao):
+                    print(f"Funcionário {nome} criado com sucesso!")
+                else:
+                    print("Erro ao criar funcionário, verifique a senha ou a opção selecionada")
+            else: 
+                print("ERROR")
         elif opcao == 4:
             nome = input("Digite o nome: ")
             senha = input("Digite a senha do gerente: ")
@@ -433,49 +449,41 @@ def menu_produtos(usuario_logado):
             print("Produto adicionado com sucesso!")
         elif opcao == 3 and usuario_logado["Tipo"] in ["funcionario", 'gerente']:
             print(f"Bem-vindo ao menu de edição, {usuario_logado['Nome']}")
-            chave_produto = input("Digite o nome ou código do produto que deseja editar: ").lower()
+            chave_produto = input("Digite o nome do produto que deseja editar: ").lower()
             produto = buscar_produto(chave_produto)
-            if produto:
-                print("1 - Adicionar estoque")
-                print("2 - Reduzir estoque")
-                print("3 - Alterar preço")
-                print("4 - Alterar nome")
+            if produto: # Ocorreu um erro que se colocar o código o nome do produto é alterado para o código, sei onde está o problema mas não sei como o resolver, por isso retirei essa opção
+                print("1 - Alterar estoque")
+                print("2 - Alterar preço")
+                print("3 - Alterar nome")
                 try:
                     opcao_editar = int(input("Opção: "))
                 except ValueError:
                     print("Escolha uma opção válida")
                     continue
-
                 if opcao_editar == 1:
                     try:
-                        quantidade = int(input("Digite a quantidade a ser adicionada: "))
-                        atualizar_produto(produto["Código"], quantidade=quantidade)
-                        print(f"Estoque de {produto['Nome']} atualizado! Quantidade adicionada: {quantidade}")
-                    except ValueError:
-                        print("Quantidade inválida!")
-                elif opcao_editar == 2:
-                    try:
-                        quantidade = int(input("Digite a quantidade a ser reduzida: "))
-                        if produto["Quantidade"] >= quantidade:
-                            atualizar_produto(produto["Código"], quantidade=-quantidade)
-                            print(f"Estoque de {produto['Nome']} atualizado! Quantidade reduzida: {quantidade}")
+                        quantidade = int(input("Digite a quantidade a ser alterada (aperte - para reduzir): "))
+                        if int(produto["Quantidade"]) >= quantidade:
+                            atualizar_produto(produto["Nome"],  quantidade=quantidade, usuario_logado=usuario_logado)
+                            nova_quantidade = int(produto["Quantidade"]) + quantidade
+                            print(f"Estoque de {produto['Nome']} atualizado! Quantidade atual: {nova_quantidade}")
                         else:
                             print("Não há estoque suficiente para reduzir essa quantidade")
                     except ValueError:
                         print("Quantidade inválida!")
-                elif opcao_editar == 3:
+                elif opcao_editar == 2:
                     try:
                         preco = float(input("Digite o novo preço: "))
                         if preco >= 0:
-                            atualizar_produto(produto["Código"], preco=preco)
+                            atualizar_produto(produto["Nome"],  preco=preco, usuario_logado=usuario_logado)
                             print(f"Preço de {produto['Nome']} atualizado!")
                         else:
                             print("O novo preço não pode ser menor que 0")
                     except ValueError:
                         print("Preço inválido!")
-                elif opcao_editar == 4:
+                elif opcao_editar == 3:
                     novo_nome = input("Digite o novo nome: ")
-                    atualizar_produto(produto["Código"], nome=novo_nome)
+                    atualizar_produto(produto["Nome"], novo_nome=novo_nome, usuario_logado=usuario_logado)
                     print(f"Nome de {produto['Nome']} atualizado para {novo_nome}")
                 else:
                     print("Escolha uma opção válida")
